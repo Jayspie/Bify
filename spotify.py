@@ -1,46 +1,52 @@
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials
 from info import *
 import random
-import pprint
+import time
 import requests
 
+#autherization 
+auth_manager = SpotifyClientCredentials(client_id,client_secret)
+spotify = spotipy.Spotify(auth_manager=auth_manager)
 
-scope="playlist-modify-public"
-username=user_id
-wowo_id='5vhMI6qUtzn8rDzJe7gSxv'
-feels_id=""
-weekly="37i9dQZEVXcNoaSgR2ccmo"
-
-token=SpotifyOAuth(scope=scope, username=username)
-spotifyobj=spotipy.Spotify(auth_manager=token)
-
-a=spotifyobj.playlist_tracks(wowo_id)
+#Open/Fixed varables 
 i=0
 list=[]
+ids=[]
+track_num=29
+
+#Get data from playlist
+a=spotify.playlist_tracks(weekly)
+
+#Getting songs in the playlist Ids and putting them in a playlist
 while True:
-    tracks=a['items'][i]['track']['id'] 
+    tracks=a['items'][i]['track']['id']
     list.append(tracks)
-    if i<99:
+    if i<track_num:
         i+=1
-    elif i==99:
+    elif i==track_num:
         break
+time.sleep(15)
+
+
 while True:
-    track=spotifyobj.track(random.choice(list))
-    images=str(track['album']['images'][0]['url'])
-    mp3=str(track['preview_url'])
+    
+    #choosing a random Id(song) and getting information about the song
+    random_index = random.randint(0, len(list))
+    tRack=spotify.track(list[random_index])
+
+    #Getting the song image, preview sound, name of the song, and the artist.
+    images=str(tRack['album']['images'][0]['url'])
+    mp3=str(tRack['preview_url'])
     if mp3=='None':
         continue
     else:
-        x=str(track['artists'][0]['name'])
-        song=str(track['album']['name'])
+        x=str(tRack['artists'][0]['name'])
+        song=str(tRack['name'])
         artist=x.replace(" ", "")
-        print(images)
-        print(mp3)
-        print(artist)
-        print(song)
         break
 
+#Downloading the image and preview sound
 imurl = images
 response = requests.get(imurl)
 with open("image.jpg", "wb") as f:
